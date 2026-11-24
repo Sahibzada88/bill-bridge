@@ -17,9 +17,13 @@ export const maxDuration = 30;
 
 const fieldsSchema = z.object({ requestId: z.string().uuid(), kind: z.enum(["bill", "supporting", "receipt"]) });
 const err = (code: string, status: number) => NextResponse.json({ ok: false, code }, { status, headers: { "Cache-Control": "no-store" } });
+const deny = (reason: string) => {
+  console.warn(`[upload] forbidden: ${reason}`);
+  return err("forbidden", 403);
+};
 
 export async function POST(req: Request) {
-  if (!isSameOrigin(req)) return err("forbidden", 403);
+  if (!isSameOrigin(req)) return deny("origin");
 
   const session = await getSession();
   if (!session || session.profile.is_suspended) return err("forbidden", 401);
@@ -43,23 +47,32 @@ export async function POST(req: Request) {
   const admin = createAdminClient();
 
   // ---------- Authorization (server-side; the bucket is private and has no client policies) ----------
-  const { data: request } = await admin.from("requests").select("id, requester_id, lifecycle").eq("id", requestId).maybeSingle();
-  if (!request) return err("forbidden", 403);
+  const { data: request, error: requestError } = await admin.from("requests").select("id, requester_id, lifecycle").eq("id", requestId).maybeSingle();
+  if (requestError) {
+    console.error("[upload] request lookup failed", requestError.code, requestError.message);
+    return err("unknown", 500);
+  }
+  if (!request) return deny("request_missing");
 
   if (kind === "receipt") {
-    if (session.profile.role !== "donor") return err("forbidden", 403);
+    if (session.profile.role !== "donor") return deny("receipt_role");
     const { data: res } = await admin.from("reservations").select("id, status, ended_at")
       .eq("request_id", requestId).eq("donor_id", session.userId).order("created_at", { ascending: false }).limit(1);
     const r = res?.[0];
     const recent = !!r && (r.status === "active" || (r.status === "expired" && !!r.ended_at && Date.now() - new Date(r.ended_at).getTime() < 24 * 3600 * 1000));
-    if (!recent) return err("forbidden", 403);
+    if (!recent) return deny("receipt_reservation");
   } else {
-    if (session.profile.role !== "requester" || request.requester_id !== session.userId) return err("forbidden", 403);
+    if (session.profile.role !== "requester") return deny("requester_role");
+    if (request.requester_id !== session.userId) return deny("request_owner");
     const allowed = kind === "bill" ? ["draft", "open"] : ["draft", "open", "reserved"];
-    if (!allowed.includes(request.lifecycle)) return err("forbidden", 403);
+    if (!allowed.includes(request.lifecycle)) return deny("lifecycle");
     if (kind === "bill" && request.lifecycle === "open") {
-      const { count } = await admin.from("donor_reviews").select("id", { count: "exact", head: true }).eq("request_id", requestId);
-      if (count) return err("forbidden", 403); // bills are frozen once a donor has reviewed
+      const { count, error: reviewError } = await admin.from("donor_reviews").select("id", { count: "exact", head: true }).eq("request_id", requestId);
+      if (reviewError) {
+        console.error("[upload] donor review lookup failed", reviewError.code, reviewError.message);
+        return err("unknown", 500);
+      }
+      if (count) return deny("bill_reviewed");
     }
     const { count } = await admin.from("documents").select("id", { count: "exact", head: true })
       .eq("request_id", requestId).eq("status", "active").neq("kind", "receipt");

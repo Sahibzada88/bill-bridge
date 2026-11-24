@@ -1,11 +1,12 @@
 # Database
 
-PostgreSQL via Supabase. Four ordered migrations in `supabase/migrations/` (also bundled in `supabase/setup_all.sql`):
+PostgreSQL via Supabase. Five ordered migrations in `supabase/migrations/` (also bundled in `supabase/setup_all.sql`):
 
 1. `…0001_schema.sql` – enums, tables, indexes, `updated_at` triggers, signup→profile trigger
 2. `…0002_functions.sql` – workflow functions, guards, notification/audit helpers, admin functions
 3. `…0003_rls_grants_views.sql` – RLS enable + policies, column grants, function grants, public views, private storage bucket
 4. `…0004_files_in_db_and_email.sql` – `document_blobs` (base64 files), `email_outbox` + trigger, `profiles.email_notifications`, `claim_email_outbox` / `finish_email`
+5. `…0005_service_role_grants.sql` – grants server-only table/sequence access to `service_role` and sets defaults for future objects
 
 ## State machines
 
