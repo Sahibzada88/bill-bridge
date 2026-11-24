@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-forest-50: #eef5f0;
+  --color-forest-100: #d9eadf;
+  --color-forest-200: #b4d3bf;
+  --color-forest-300: #86b698;
+  --color-forest-500: #3f7a5c;
+  --color-forest-600: #2e6449;
+  --color-forest-700: #1f4d3a;
+  --color-forest-800: #173d2e;
+  --color-forest-900: #102c21;
+  --color-cream: #f7f2e8;
+  --color-cream-dark: #ede5d3;
+  --color-paper: #ffffff;
+  --color-ink: #1c2520;
+  --color-muted: #55615a;
+  --color-line: #dedacd;
+  --color-mist: #eef0ec;
+  --color-danger: #a4301e;
+  --color-danger-soft: #fbe9e5;
+  --color-warn: #8a5a00;
+  --color-warn-soft: #fbf0d4;
+  --color-info-soft: #e4eef3;
+  --color-info: #1f4f66;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+}
+
+html { background: var(--color-cream); color: var(--color-ink); -webkit-text-size-adjust: 100%; }
+body { font-family: var(--font-sans); min-height: 100dvh; line-height: 1.55; }
+:lang(ur) body, html[lang="ur"] body {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", "Segoe UI", Tahoma, "Arial Unicode MS", sans-serif;
+  line-height: 2;
+}
+html[lang="ur"] .font-display { font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", serif; }
+h1, h2, h3 { text-wrap: balance; }
+.font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+
+:focus-visible { outline: 3px solid var(--color-forest-500); outline-offset: 2px; border-radius: 4px; }
+::selection { background: var(--color-forest-200); }
+
+/* Segmented "utility meter" progress: ten ticks that fill like a meter reading. */
+.meter { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+.meter > i { height: 10px; background: var(--color-mist); border-radius: 2px; }
+.meter > i[data-on="true"] { background: var(--color-forest-600); }
+.meter > i[data-partial="true"] { background: linear-gradient(to right, var(--color-forest-600) var(--fill, 50%), var(--color-mist) var(--fill, 50%)); }
+[dir="rtl"] .meter > i[data-partial="true"] { background: linear-gradient(to left, var(--color-forest-600) var(--fill, 50%), var(--color-mist) var(--fill, 50%)); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
