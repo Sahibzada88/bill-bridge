@@ -28,6 +28,8 @@ const serverSchema = z.object({
   RESERVATION_MINUTES: z.coerce.number().int().min(5).max(60).optional().default(20),
   DONOR_ORIGINAL_ACCESS: z.enum(["reserved", "verified"]).optional().default("reserved"),
   CRON_SECRET: z.string().optional().default(""),
+  // Login location: "required" (users must allow it; admins are asked but never locked out), "requested" (asked, may skip), "off".
+  LOCATION_POLICY: z.enum(["required", "requested", "off"]).optional().default("required"),
   // Where uploaded files live: "database" (base64 in Postgres, zero extra setup) or "storage" (Supabase Storage bucket).
   STORAGE_BACKEND: z.enum(["database", "storage"]).optional().default("database"),
   // Gmail SMTP with a Google App Password (optional; email features are skipped when unset).

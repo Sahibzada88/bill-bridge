@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { locationState } from "@/lib/location-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDbFile, isDbPath, signedStorageUrl } from "@/lib/file-store";
 import { getSession } from "@/lib/auth";
@@ -23,6 +24,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   if (!z.string().uuid().safeParse(id).success) return NextResponse.json({ error: "not_found" }, { status: 404, headers: NO_STORE });
 
   const session = await getSession();
+  const blocked = session ? (await locationState(session.profile.role)).blocking : false;
   if (!(await rateLimitByIp("doc-sign", 120, 600)).ok) return NextResponse.json({ error: "rate" }, { status: 429, headers: NO_STORE });
   if (session && !(await rateLimitByUser("doc-sign", session.userId, type === "original" ? 40 : 200, 600)).ok) {
     return NextResponse.json({ error: "rate" }, { status: 429, headers: NO_STORE });
@@ -36,7 +38,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   let path: string;
   let ttl: number;
   if (type === "original") {
-    if (!session || !(await canOpenOriginal(session, doc))) return notFound();
+    if (!session || blocked || !(await canOpenOriginal(session, doc))) return notFound();
     path = doc.storage_path; ttl = ORIGINAL_TTL;
   } else {
     if (doc.kind !== "bill" || !doc.preview_path) return notFound();

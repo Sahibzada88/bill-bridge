@@ -12,6 +12,7 @@ import { fail, zodFail } from "@/lib/action-utils";
 import { publicEnv } from "@/lib/env";
 import { safeRedirectPath } from "@/lib/utils";
 import { sha256Hex } from "@/lib/security/hash";
+import { recordLoginAndRequestLocation } from "@/lib/location-server";
 import type { ActionResult } from "@/types";
 
 export async function registerAction(input: unknown, captchaToken: string | null): Promise<ActionResult> {
@@ -70,6 +71,7 @@ export async function loginAction(input: unknown, captchaToken: string | null, n
     return fail(t, "suspended", { error: t("auth.err.suspended") });
   }
   await logSecurityEvent(data.user.id, "login_success", {});
+  await recordLoginAndRequestLocation(data.user.id);
   revalidatePath("/", "layout");
   redirect(safeRedirectPath(next));
 }

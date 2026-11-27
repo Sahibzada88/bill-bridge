@@ -6,7 +6,7 @@ PostgreSQL via Supabase. Five ordered migrations in `supabase/migrations/` (also
 2. `…0002_functions.sql` – workflow functions, guards, notification/audit helpers, admin functions
 3. `…0003_rls_grants_views.sql` – RLS enable + policies, column grants, function grants, public views, private storage bucket
 4. `…0004_files_in_db_and_email.sql` – `document_blobs` (base64 files), `email_outbox` + trigger, `profiles.email_notifications`, `claim_email_outbox` / `finish_email`
-5. `…0005_service_role_grants.sql` – grants server-only table/sequence access to `service_role` and sets defaults for future objects
+5. `…0005_login_locations.sql` – `login_locations`, audited admin-only read functions `admin_latest_locations` / `admin_user_locations`, retention in `cleanup_rate_limits`
 
 ## State machines
 
@@ -37,7 +37,7 @@ Only workflow functions can change either column.
 | `notifications` | in-app | own (only `read_at` updatable) |
 | `reports` | user reports | reporter inserts/reads own; admin |
 | `app_settings` | feature flags (e.g. `require_admin_mfa`) | admin read; writes service role |
-| `rate_limits`, `contact_messages`, `document_blobs`, `email_outbox` | server-only | RLS on, no client policies, no client grants |
+| `rate_limits`, `contact_messages`, `document_blobs`, `email_outbox`, `login_locations` | server-only | RLS on, no client policies, no client grants |
 
 Views (explicit safe columns, owner-rights on purpose): `public_request_cards`, `profile_names`, `platform_stats`.
 
@@ -59,7 +59,7 @@ Errors are raised as machine codes (`raise exception 'already_reserved'`); the a
 - Confirming a payment that completes the bill sets `completed`; otherwise the request reopens with the remaining balance.
 
 ## Testing the database
-`npm run test:db` creates a disposable cluster, applies `tests/db/00_supabase_stub.sql` (a minimal stand-in for Supabase roles/auth/storage) plus all migrations, then runs `tests/db/20_rls_and_workflow.sql` (105 assertions), `tests/db/25_outbox_and_blobs.sql` (blobs + outbox, 18 assertions), applies `setup_all.sql` to a second fresh database, and a parallel-session race test. The stub is **not** Supabase: re-verify on a real project (see DEPLOYMENT.md checklist).
+`npm run test:db` creates a disposable cluster, applies `tests/db/00_supabase_stub.sql` (a minimal stand-in for Supabase roles/auth/storage) plus all migrations, then runs `tests/db/20_rls_and_workflow.sql` (105 assertions), `tests/db/25_outbox_and_blobs.sql` (blobs + outbox, 18 assertions), `tests/db/27_login_locations.sql` (admin-only audited access, 18 assertions), applies `setup_all.sql` to a second fresh database, and a parallel-session race test. The stub is **not** Supabase: re-verify on a real project (see DEPLOYMENT.md checklist).
 
 ## Adding migrations
 New tables must `enable row level security` and be granted explicitly (default privileges are revoked for `anon`/`authenticated`). Add a test.

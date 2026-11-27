@@ -14,9 +14,7 @@ Easiest: paste `supabase/setup_all.sql` (all migrations in one file) into **SQL 
 supabase link --project-ref <ref>
 supabase db push          # applies supabase/migrations/*.sql in filename order
 ```
-Order: `…0001_schema.sql` → `…0002_functions.sql` → `…0003_rls_grants_views.sql` → `…0004_files_in_db_and_email.sql` → `…0005_service_role_grants.sql`.
-
-For an existing project, apply only the new migration (or use `supabase db push`). Do not rerun `setup_all.sql` on an existing project.
+Order: `…0001_schema.sql` → `…0002_functions.sql` → `…0003_rls_grants_views.sql` → `…0004_files_in_db_and_email.sql`.
 
 Verify afterwards (SQL Editor):
 ```sql

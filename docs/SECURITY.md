@@ -25,6 +25,12 @@ layer cannot bypass them. "Verified by" below names the test that exercises the 
 | **Open redirect** | `next` parameters validated to same-site relative paths | `validation.test` |
 | **Fake payment confirmation** | Only the requester (or an admin resolving a dispute) can mark a payment confirmed; there is no donor-side confirm path | DB tests |
 
+## Login location (privacy-sensitive)
+- `login_locations` has RLS on, **no policies and no client grants**. The only read path is two `SECURITY DEFINER` functions that require an admin **with MFA (aal2)** and write an audit-log entry on every call (target user recorded). DB-tested: users cannot read even their own rows; admin without MFA is refused; retention purge works.
+- The browser can only send a range-checked payload to `/api/location`; the user id always comes from the server session, never from the request. The endpoint works only while a per-login cookie is pending (no row spam), is same-origin only and rate-limited.
+- Refusals are stored as evidence. Admins are never locked out. IPs are stored only as salted hashes; city/country come from the host's geo headers.
+- Limits: spoofable by VPN/fake GPS; consent and legal basis are the operator's responsibility.
+
 ## Email
 - Notification emails contain only translated dictionary text and a link built from the configured site URL plus a validated relative path (cannot be turned into a phishing link; tested). No user-supplied text is placed in subjects or headers (contact-form names are stripped of line breaks).
 - The Gmail App Password lives only in server environment variables. Use an App Password (revocable at any time), never the account password.

@@ -23,6 +23,7 @@ A donor-driven platform where people struggling with utility bills can request h
 | **Documents** | Private (server-only table or bucket), JPG/PNG/PDF, 5 MB server limit (4.5 MB on Vercel), real signature check, random names, EXIF stripped (image re-encode), PDFs rebuilt without scripts/attachments/annotations, redacted public preview, 60 s signed URLs (storage backend) or authorized streaming (database backend), access logs, SHA-256 duplicate detection |
 | **Admin** | Stats, users (role/suspend), requests (remove/restore/unflag), reports, payment disputes, audit log, security monitor, MFA setup |
 | **Public site** | Home, browse, request detail, how it works, about, contact, FAQ, safety, privacy, terms, transparency dashboard |
+| **Login location** | Every login records an approximate network location (server-side) and asks the user to share their device location (browser permission). Required for donors/requesters by default (`LOCATION_POLICY`), admins never locked out. Refusals are recorded too. **Only admins (with MFA) can read it, only through audited SQL functions**; 12-month retention |
 | **i18n** | English + Urdu, right-to-left layout, typed so a missing translation is a compile error |
 | **Notifications** | In-app with unread badge, **plus email through Gmail (Google App Password)** via a database outbox (opt-out in Settings, throttled, retried, sent after the response). Contact form is forwarded to your inbox |
 | **Files** | Stored as **base64 in Postgres** by default (zero extra setup) or in a private Storage bucket (`STORAGE_BACKEND`); the browser shrinks big photos to fit Vercel's 4.5 MB request limit |
@@ -69,9 +70,9 @@ Everything is manual: **no GitHub Actions / CI / auto-deploy exist in this repo*
 | `npm audit` | 0 vulnerabilities |
 | `tsc --noEmit` | pass |
 | `eslint .` | pass, 0 warnings |
-| `next build` | pass (49 routes + proxy) |
-| Vitest | **57 / 57 passed** (5 files) |
-| `npm run test:db` | **123 assertions passed**; `supabase/setup_all.sql` applies cleanly to a fresh database with RLS on every table; concurrency: 8 simultaneous reservations → exactly **1** winner; 6 simultaneous payment submissions on one reservation → exactly **1** accepted |
+| `next build` | pass (51 routes + proxy) |
+| Vitest | **70 / 70 passed** (6 files) |
+| `npm run test:db` | **141 assertions passed**; `supabase/setup_all.sql` applies cleanly to a fresh database with RLS on every table; concurrency: 8 simultaneous reservations → exactly **1** winner; 6 simultaneous payment submissions on one reservation → exactly **1** accepted |
 | Production-server smoke test (no Supabase) | Security headers, per-request CSP nonce, route guard redirect, RTL switch, CSRF 403, unauthenticated upload 401, malformed ids 404, cron disabled without secret |
 
 Bugs found *by* these tests and fixed during the build: PDF object-stream JavaScript bypass; orphaned annotation objects surviving PDF rebuild; a requester edit-lock trigger that errored under RLS; donors unable to file reports (RLS); untranslated admin error codes; HTTP 200 on missing pages (root `loading.tsx`).
@@ -94,7 +95,8 @@ Please treat these as the honest list of what is **not** done or **not verified*
 10. Legal pages are **templates**; have a lawyer review. Urdu text should be reviewed by a native speaker. Fonts are system fonts (no bundled Nastaliq).
 11. `NEXT_PUBLIC_*` variables are baked in **at build time**; set them before building.
 12. Account self-deletion and data export are not self-service.
-13. Rate limiting trusts `x-forwarded-for` (correct on Vercel; configure your proxy elsewhere).
+13. **Login location is evidence, not proof.** VPNs and fake-GPS apps can fake it; the network-derived location is approximate (city level, and empty when running locally). Browsers only share GPS if the user clicks Allow, so the app can require it before use but cannot take it silently. The block is enforced in the UI, in server actions and in the file routes, but not on every possible read. It needs HTTPS (works on `localhost` and Vercel). **Collecting location has legal duties** (consent notice, purpose, retention, access control): the privacy page has a template section, but have a lawyer confirm it for your country. Users cannot see their own location rows (admin-only, as requested); consider adding that for transparency.
+14. Rate limiting trusts `x-forwarded-for` (correct on Vercel; configure your proxy elsewhere).
 
 ## Project layout
 

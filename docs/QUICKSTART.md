@@ -87,6 +87,27 @@ Phir *Authentication → Emails → Templates* mein links aise rakhein (kisi bhi
 
 ---
 
+## C2. Login location (fraud ke liye)
+
+Har login par app do cheezein record karti hai:
+1. **Network se andazan location** (shehar/mulk): server khud karta hai, user ki ijazat nahi chahiye. Local par yeh khali hoga (sirf Vercel par bharta hai).
+2. **Device ki asli location** (GPS/Wi-Fi): browser user se "Allow" poochta hai. User refuse kare to refusal bhi record hoti hai.
+
+`.env` mein `LOCATION_POLICY`:
+- `required` (default): donor/requester Allow kiye baghair aage nahi ja sakte. **Admin kabhi lock nahi hota.**
+- `requested`: poochha jata hai, magar user "Not now" kar sakta hai.
+- `off`: kuch record nahi hota.
+
+**Dekhna:** Admin login (authenticator ke baad) → **Dashboard → Admin → Locations**. Har user ki latest location, map ka link, aur poori history. Jab bhi admin yeh page kholta hai, **audit log mein likha jata hai**. Data 12 mahine baad khud delete ho jata hai.
+
+Zaroori baatein:
+- Location sirf **HTTPS** par ya `localhost` par kaam karti hai.
+- VPN ya fake-GPS se location jhooti ho sakti hai. Isay **ek sabut** samjhein, pakka saboot nahi.
+- Purane (already logged-in) users se agle login par poochha jayega.
+- Privacy policy mein section 5 add hai (English + Urdu). Apne mulk ke qanoon ke mutabiq kisi wakeel se zaroor check karwayein.
+
+---
+
 ## D. Files database mein: faide aur hadood
 
 | | |

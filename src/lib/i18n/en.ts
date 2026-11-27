@@ -202,6 +202,16 @@ export const en = {
   "err.invalid_status": "That status isn't valid.", "err.report_not_found": "Report not found.",
   "email.open": "Open BillBridge", "email.footer": "You get these emails because notifications are on. You can turn them off in Settings.",
   "st.emailNotifications": "Email me about important updates", "st.emailNotifications.help": "We email you when something needs your attention (new message, payment, question).",
+  "loc.title": "Please share your location", "loc.body": "To protect donors and requesters from fraud, we record your location each time you log in. Please allow location access to continue.",
+  "loc.banner": "Please allow location so we can help protect the community from fraud.", "loc.allow": "Allow location", "loc.later": "Not now",
+  "loc.asking": "Waiting for your permission…", "loc.privacy": "Only platform administrators can see this. It is used only to investigate fraud or abuse, access is logged, and it is deleted after 12 months.",
+  "loc.denied": "Location is blocked. Open your browser's site settings for this website, set Location to Allow, then press the button again.",
+  "loc.unavailable": "We couldn't get your location. Turn on your device's location (GPS or Wi-Fi) and try again.", "loc.insecure": "Location only works on a secure (https) page.",
+  "ad.locations": "Locations", "ad.loc.title": "Login locations",
+  "ad.loc.help": "Latest known location per user. Every time you open this page it is written to the audit log. Locations can be wrong or faked (VPN, fake GPS apps): treat them as one piece of evidence, not proof.",
+  "ad.loc.gps": "Device location", "ad.loc.ip": "Network (approximate)", "ad.loc.map": "Open map", "ad.loc.history": "History", "ad.loc.never": "No location recorded.",
+  "ad.loc.denied": "Refused to share location", "ad.loc.unavailable": "Location unavailable", "ad.loc.back": "All users", "ad.loc.accuracy": "accuracy ±{m} m", "ad.loc.lastLogin": "Last login",
+  "privacy.5.t": "Login location", "privacy.5.b": "Each time you log in we ask your browser for your location and also record an approximate location from your network connection. This is stored securely, can be seen only by platform administrators, every access is logged, and it is deleted after 12 months. We use it only to investigate fraud and abuse.",
   "err.not_found_generic": "Not found.",
 
   // Public pages
